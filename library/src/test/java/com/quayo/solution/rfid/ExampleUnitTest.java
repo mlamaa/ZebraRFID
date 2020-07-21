@@ -1,4 +1,4 @@
-package com.quayo.library;
+package com.quayo.solution.rfid;
 
 import org.junit.Test;
 

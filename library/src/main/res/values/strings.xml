@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="print_message_bluetooth_not_supported">Bluetooth not supported</string>
+    <string name="print_message_turn_on_bluetooth">Turn on Bluetooth</string>
+    <string name="print_message_unknown_host_exception">A host exception was due, Could not finish printing</string>
+    <string name="message_no_paired_rfid_devices">No Paired RFID Device</string>
+    <string name="aaset_trx_body_detected_tags">No.Tags</string>
+</resources>
