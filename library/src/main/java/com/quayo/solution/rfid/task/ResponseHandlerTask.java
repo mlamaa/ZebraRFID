@@ -39,15 +39,17 @@ public class ResponseHandlerTask extends AsyncTask<Void, Void, Boolean> {
 //                            }
 
                         oldObject = Connector.tagsReadInventory.get(index);
-                    oldObject.incrementCount();
+                    if (oldObject != null) {
+                        oldObject.incrementCount();
 //                        if (oldObject.getMemoryBankData() != null && !oldObject.getMemoryBankData().equalsIgnoreCase(memoryBankData))
 //                            oldObject.setMemoryBankData(memoryBankData);
 //                        //oldObject.setEPCId(inventoryItem.getEPCId());
 
-                    oldObject.setPC(response_tagData.PC);
-                    oldObject.setPhase(response_tagData.Phase);
-                    oldObject.setChannelIndex(response_tagData.ChannelIndex);
-                    oldObject.setRSSI(response_tagData.RSSI);
+                        oldObject.setPC(response_tagData.PC);
+                        oldObject.setPhase(response_tagData.Phase);
+                        oldObject.setChannelIndex(response_tagData.ChannelIndex);
+                        oldObject.setRSSI(response_tagData.RSSI);
+                    }
                 }
             } else {
                 //Tag is encountered for the first time. Add it.
