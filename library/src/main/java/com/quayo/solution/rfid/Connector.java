@@ -188,6 +188,10 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
         this.tagCountChangeListener = tagCountChangeListener;
     }
 
+    public void setRFIDEventListener(RFIDEventListener eventListener){
+        this.eventListener = eventListener;
+    }
+
     public ArrayList<ReaderDevice> loadAvailableReaders(BluetoothService bluetoothService) {
         ArrayList<ReaderDevice> Readers = new ArrayList<ReaderDevice>();
         HashSet<BluetoothDevice> availableReaders = new HashSet();
