@@ -235,6 +235,10 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
         genericReader.sendCommand(command_locateTag);
     }
 
+    public boolean isOK(){
+        return isOK;
+    }
+
     @Override
     public void responseDataParsedFromGenericReader(ResponseMsg responseMsg) {
 
