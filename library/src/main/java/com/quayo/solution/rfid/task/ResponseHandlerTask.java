@@ -30,7 +30,7 @@ public class ResponseHandlerTask extends AsyncTask<Void, Void, Boolean> {
                 if (index >= 0) {
                     Connector.TOTAL_TAGS++;
                     //Tag is already present. Update the fields and increment the count
-                    if (response_tagData.tagAcessOprations != null)
+                  //  if (response_tagData.tagAcessOprations != null)
 //                            for (AcessOperation acessOperation : response_tagData.tagAcessOprations) {
 //                                if (acessOperation.opration.equalsIgnoreCase("read")) {
 ////                                    memoryBank = acessOperation.memoryBank;
