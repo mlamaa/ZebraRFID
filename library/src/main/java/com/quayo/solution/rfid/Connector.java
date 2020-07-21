@@ -59,7 +59,7 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
     Activity activity;
     public BluetoothService bluetoothService;
     public static Handler mHandler;
-    GenericReader genericReader;
+    public GenericReader genericReader;
     boolean isOK = false;
     public static ArrayList<Response_TagData> list = new ArrayList<>();
     public static String macAddress;
@@ -82,9 +82,6 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
     List<InventoryListItem> inventoryItems = new ArrayList<>();
     List<String> inv = new ArrayList<>();
 
-    public static Command_SetRegulatory applyCommand = new Command_SetRegulatory();
-    //bynamic power
-    public static Command_SetDynamicPower dynamicPowerSettings = new Command_SetDynamicPower();
     private OnProximityChangeListener proximityChangeListener;
     private OnTagCountChangeListener tagCountChangeListener;
     private RFIDEventListener eventListener;
@@ -217,22 +214,6 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
     public static boolean isConnected(BluetoothService bluetoothService) {
         return bluetoothService.isConnected();
 
-    }
-
-    private void readTags(final GenericReader genericReader) {
-        /* the two commands setRegulatory and setDynamicPower are needed to allow the reader to read  **/
-        genericReader.sendCommand(applyCommand);
-        genericReader.sendCommand(COMMAND_TYPE.COMMAND_SETREGULATORY, CONFIG_TYPE.CURRENT);
-
-        dynamicPowerSettings.setDisable(true);
-        genericReader.sendCommand(dynamicPowerSettings);
-        genericReader.sendCommand(COMMAND_TYPE.COMMAND_SETDYNAMICPOWER, CONFIG_TYPE.CURRENT);
-
-        Command_Inventory inventoryCommand = new Command_Inventory();
-        Param_AccessConfig accessConfig = new Param_AccessConfig();
-        accessConfig.setDoSelect(true);
-        inventoryCommand.AccessConfig = accessConfig;
-        genericReader.sendCommand(inventoryCommand);
     }
 
     public void locateTag(GenericReader genericReader, byte[] epc) {
