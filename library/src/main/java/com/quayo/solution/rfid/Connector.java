@@ -35,6 +35,7 @@ import com.motorolasolutions.ASCII_SDK.RESPONSE_TYPE;
 import com.motorolasolutions.ASCII_SDK.ResponseMsg;
 import com.motorolasolutions.ASCII_SDK.Response_TagData;
 import com.motorolasolutions.ASCII_SDK.Response_TagProximityPercent;
+import com.quayo.solution.rfid.listener.ConnectionListener;
 import com.quayo.solution.rfid.listener.OnProximityChangeListener;
 import com.quayo.solution.rfid.listener.OnTagCountChangeListener;
 import com.quayo.solution.rfid.listener.RFIDEventListener;
@@ -87,6 +88,7 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
     private OnProximityChangeListener proximityChangeListener;
     private OnTagCountChangeListener tagCountChangeListener;
     private RFIDEventListener eventListener;
+    private ConnectionListener connectionListener;
 
     protected abstract void ShowMessageBox(final String message, final Activity activity);
 
@@ -404,6 +406,8 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
 
             if (btAdapter.isEnabled() && rfidDevices.size() != 0) {
                 isOK = true;
+                if(connectionListener != null)
+                    connectionListener.connect();
                 //     ((Tabs_Activity)activity).showRfidProgressDialog();
                 connect(activity);
             }
@@ -436,8 +440,10 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
     @Override
     public void triggerReleaseEventRecieved() {
         abort();
+        for (final InventoryListItem tag : inventoryItems)
+            inv.add(tag.getTagID());
         if (eventListener != null)
-            eventListener.triggerReleaseEvent();
+            eventListener.triggerReleaseEvent(inv);
     }
 
     public static String asciiToHex(String asciiValue) {
@@ -458,5 +464,9 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
 
         }
         return output.toString();
+    }
+
+    public void setConnectionListener(ConnectionListener connectionListener) {
+        this.connectionListener = connectionListener;
     }
 }
