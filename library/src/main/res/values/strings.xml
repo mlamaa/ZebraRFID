@@ -6,4 +6,6 @@
     <string name="print_message_unknown_host_exception">A host exception was due, Could not finish printing</string>
     <string name="message_no_paired_rfid_devices">No Paired RFID Device</string>
     <string name="aaset_trx_body_detected_tags">No.Tags</string>
+    <string name="rfid_connect">Connecting to RFID.......</string>
+    <string name="rfid_message_unknown_host_exception">An unknown host exception was throwed, could not connect to rfid</string>
 </resources>
