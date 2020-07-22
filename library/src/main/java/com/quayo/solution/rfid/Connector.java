@@ -125,10 +125,6 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
         inventoryItems = new ArrayList<>();
     }
 
-    public void setActivity(Activity activity) {
-        this.activity = activity;
-    }
-
     public void initialize(Activity activity) {
 
         try {
@@ -523,6 +519,7 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
     }
 
     public void onDestroy(Activity activity){
+        releaseMotorolaScanner(activity);
         unregisterBReceiver(activity);
         unregisterBReceiverFail(activity);
     }
