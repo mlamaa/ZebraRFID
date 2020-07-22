@@ -3,7 +3,11 @@ package com.quayo.solution.rfid;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -88,6 +92,28 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
     private ConnectionListener connectionListener;
 
     protected abstract void ShowMessageBox(final String message, final Activity activity);
+    protected abstract void handleScannedItem(String data);
+    protected void dismissProgressDialog(){
+
+    }
+    public final void retryToConnect(Activity activity){
+        bluetooth(activity);
+    }
+
+    public static class MOTOROLA_DW {
+        // This intent string contains the source of the data as a string
+        public static final String SOURCE_TAG = "com.motorolasolutions.emdk.datawedge.source";
+        // This intent string contains the captured data as a string
+        // (in the case of MSR this data string contains a concatenation of the
+        // track data)
+        public static final String DATA_STRING_TAG = "com.motorolasolutions.emdk.datawedge.data_string";
+
+        // Let's define the API intent strings for the soft scan trigger
+        public static final String ACTION_SOFTSCANTRIGGER = "com.motorolasolutions.emdk.datawedge.api.ACTION_SOFTSCANTRIGGER";
+        public static final String EXTRA_PARAM = "com.motorolasolutions.emdk.datawedge.api.EXTRA_PARAMETER";
+        public static final String DWAPI_TOGGLE_SCANNING = "TOGGLE_SCANNING";
+        public static final String BARCODE_DETECTED_ACTION = "com.quayo.sfa.scanner";
+    }
 
     public void resetClassData() {
         inventoryList = new TreeMap<>();
@@ -114,11 +140,46 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
             genericReader = new GenericReader();
             genericReader.attachActivity(this, bluetoothService);
             bluetoothService.setGenericReader(genericReader);
+            rfidBR(activity);
 //            Bluetooth(activity);
         } catch (Exception ex) {
             Log.e(TAG, ex.toString());
         }
+    }
 
+    private void rfidBR(final Activity activity) throws Exception{
+        bReceiver = new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                // When discovery finds a device
+                if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
+                    // Get the BluetoothDevice object from the Intent
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    // add the name and the MAC address of the object to the arrayAdapter
+                    // get paired devices
+//                    if (device.getName().startsWith("RFD") && device.getName().length() == 9) {
+                    if (device.getName().startsWith("RFD")) {
+
+                        dismissProgressDialog();
+
+
+//                        deviceAdapter.add(device.getName() + "\n" + device.getAddress());
+                        //deviceAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        };
+        bReceiverFail = new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if(String.valueOf(BluetoothService.MESSAGE_CONN_FAILED).equals(action)){
+                    retryToConnect(activity);
+                }
+            }
+        };
+
+        activity.registerReceiver(bReceiver, new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED));
+        activity.registerReceiver(bReceiverFail, new IntentFilter(String.valueOf(BluetoothService.MESSAGE_CONN_FAILED)));
     }
 
     public void connect(Activity activity) {
@@ -155,7 +216,7 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
                 macAddress = device.getAddress();
             } catch (Exception ex) {
                 Log.d("errorrr", "no device active");
-                Bluetooth(activity);
+                bluetooth(activity);
             }
         } else {
 //            Message msg = mHandler.obtainMessage(BluetoothService.MESSAGE_CONN_FAILED);
@@ -192,28 +253,24 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
     }
 
     public ArrayList<ReaderDevice> loadAvailableReaders(BluetoothService bluetoothService) {
-        ArrayList<ReaderDevice> Readers = new ArrayList<ReaderDevice>();
-        HashSet<BluetoothDevice> availableReaders = new HashSet();
+        ArrayList<ReaderDevice> Readers = new ArrayList<>();
+        HashSet<BluetoothDevice> availableReaders = new HashSet<>();
         bluetoothService.getAvailableDevices(availableReaders);
-        for (BluetoothDevice device : availableReaders) {
+        for (BluetoothDevice device : availableReaders)
             Readers.add(new ReaderDevice(device, device.getName(), device.getAddress(), null, null, false));
-        }
         return Readers;
     }
 
     private void disconnectFromBluetoothDevice(BluetoothDevice device, BluetoothService bluetoothService) {
         if (bluetoothService != null) {
             is_disconnection_requested = true;
-            if (device != null) {
+            if (device != null)
                 bluetoothService.disconnect(device);
-
-            }
         }
     }
 
     public static boolean isConnected(BluetoothService bluetoothService) {
         return bluetoothService.isConnected();
-
     }
 
     public void locateTag(GenericReader genericReader, byte[] epc) {
@@ -301,14 +358,12 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
     }
 
     protected void initializeService() {
-
         if (bluetoothService == null)
             bluetoothService = new BluetoothService(activity, mHandler);
 
         if (genericReader == null) {
             genericReader = new GenericReader();
             genericReader.attachActivity(this, bluetoothService);
-
         }
     }
 
@@ -361,7 +416,7 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
 
     }
 
-    public void Bluetooth(Activity activity) {
+    public void bluetooth(Activity activity) {
         BluetoothAdapter btAdapter;
         try {
             //Get BlueTooth Adapter
@@ -414,6 +469,7 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
     //these method to handel the button click trigger of the rfid device
     @Override
     public void triggerPressEventRecieved() {
+        readTags(genericReader);
         if (eventListener != null)
             eventListener.triggerPressEvent();
     }
@@ -450,4 +506,91 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
     public void setConnectionListener(ConnectionListener connectionListener) {
         this.connectionListener = connectionListener;
     }
+
+    private  void unregisterBReceiver(Activity activity){
+
+        if(bReceiver != null){
+            activity.unregisterReceiver(bReceiver);
+            bReceiver =null;
+        }
+    }
+    private  void unregisterBReceiverFail(Activity activity){
+
+        if(bReceiverFail != null){
+            activity.unregisterReceiver(bReceiverFail);
+            bReceiverFail =null;
+        }
+    }
+
+    public void onDestroy(Activity activity){
+        unregisterBReceiver(activity);
+        unregisterBReceiverFail(activity);
+    }
+
+    public void setUpScannerReceiverRFID(Activity activity) {
+        releaseMotorolaScanner(activity);
+        isScannerReady = true;
+        if(myReceiver==null){
+            myReceiver = new BroadcastReceiver() {
+
+                @Override
+                public void onReceive(Context context, Intent i) {
+                    if (isScannerReady )
+                    {
+                        isScannerReady = false;
+                        // get the source of the data
+                        String source = i.getStringExtra(MOTOROLA_DW.SOURCE_TAG);
+                        // save it to use later
+                        if (source == null)
+                            source = "scanner";
+                        // get the data from the intent
+                        String data = i.getStringExtra(MOTOROLA_DW.DATA_STRING_TAG);
+
+                        if (data != null && data.length() > 0)
+                            handleScannedItem(data);
+                    }
+                }
+            };
+            intentFilter.addAction(MOTOROLA_DW.BARCODE_DETECTED_ACTION);
+        }
+        if(!myReceiverRegistered){
+            myReceiverRegistered = true;
+            activity.registerReceiver(myReceiver, intentFilter);
+            isScannerReady = true;
+        }
+    }
+
+    private void releaseMotorolaScanner(Activity activity){
+        if(myReceiver != null){
+            activity.unregisterReceiver(myReceiver);
+            myReceiver =null;
+            myReceiverRegistered = false;
+        }
+    }
+
+    private void readTags(final GenericReader genericReader) {
+        /* the two commands setRegulatory and setDynamicPower are needed to allow the reader to read  **/
+        genericReader.sendCommand(applyCommand);
+        genericReader.sendCommand(COMMAND_TYPE.COMMAND_SETREGULATORY, CONFIG_TYPE.CURRENT);
+
+        dynamicPowerSettings.setDisable(true);
+        genericReader.sendCommand(dynamicPowerSettings);
+        genericReader.sendCommand(COMMAND_TYPE.COMMAND_SETDYNAMICPOWER, CONFIG_TYPE.CURRENT);
+
+        Command_Inventory inventoryCommand = new Command_Inventory();
+        Param_AccessConfig accessConfig = new Param_AccessConfig();
+        accessConfig.setDoSelect(true);
+        inventoryCommand.AccessConfig = accessConfig;
+        genericReader.sendCommand(inventoryCommand);
+    }
+
+    public static Command_SetRegulatory applyCommand = new Command_SetRegulatory();
+    //bynamic power
+    public static Command_SetDynamicPower dynamicPowerSettings = new Command_SetDynamicPower();
+    BroadcastReceiver myReceiver;
+    IntentFilter intentFilter = new IntentFilter();
+    private boolean isScannerReady;
+    private boolean myReceiverRegistered = false;
+    private BroadcastReceiver bReceiver = null;
+    private BroadcastReceiver bReceiverFail = null;
 }
