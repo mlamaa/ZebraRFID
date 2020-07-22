@@ -43,6 +43,7 @@ import com.quayo.solution.rfid.listener.ConnectionListener;
 import com.quayo.solution.rfid.listener.OnProximityChangeListener;
 import com.quayo.solution.rfid.listener.OnTagCountChangeListener;
 import com.quayo.solution.rfid.listener.RFIDEventListener;
+import com.quayo.solution.rfid.listener.ScanListener;
 import com.quayo.solution.rfid.task.ResponseHandlerTask;
 
 import java.io.Serializable;
@@ -90,9 +91,9 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
     private OnTagCountChangeListener tagCountChangeListener;
     private RFIDEventListener eventListener;
     private ConnectionListener connectionListener;
+    private ScanListener scanListener;
 
     protected abstract void ShowMessageBox(final String message, final Activity activity);
-    protected abstract void handleScannedItem(String data);
     protected void dismissProgressDialog(){
 
     }
@@ -503,6 +504,10 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
         this.connectionListener = connectionListener;
     }
 
+    public void setScanListener(ScanListener scanListener) {
+        this.scanListener = scanListener;
+    }
+
     private  void unregisterBReceiver(Activity activity){
 
         if(bReceiver != null){
@@ -544,7 +549,8 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
                         String data = i.getStringExtra(MOTOROLA_DW.DATA_STRING_TAG);
 
                         if (data != null && data.length() > 0)
-                            handleScannedItem(data);
+                            if(scanListener != null)
+                                scanListener.handleScannedItem(data);
                     }
                 }
             };
