@@ -97,7 +97,7 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
 
     }
     public final void retryToConnect(Activity activity){
-        bluetooth(activity);
+        ShowMessageBox(activity.getString(R.string.rfid_message_unknown_host_exception), activity);
     }
 
     public static class MOTOROLA_DW {
