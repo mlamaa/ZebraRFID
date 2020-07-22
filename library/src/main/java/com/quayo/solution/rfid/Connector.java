@@ -462,7 +462,7 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
         if (isAddedToList)
             inventoryItems.add(inventoryListItem);
     if(scanListener != null)
-        scanListener.handleScannedItem(inventoryListItem.getMemoryBankData());
+        scanListener.handleScannedItem(inventoryListItem.getTagID());
     }
 
     //these method to handel the button click trigger of the rfid device
