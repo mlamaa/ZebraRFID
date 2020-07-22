@@ -84,8 +84,8 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
     private static boolean isMessageShown;
 
 
-    List<InventoryListItem> inventoryItems = new ArrayList<>();
-    List<String> inv = new ArrayList<>();
+    public List<InventoryListItem> inventoryItems = new ArrayList<>();
+    public List<String> inv = new ArrayList<>();
 
     private OnProximityChangeListener proximityChangeListener;
     private OnTagCountChangeListener tagCountChangeListener;
@@ -461,6 +461,8 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
             tagCountChangeListener.onChange(UNIQUE_TAGS);
         if (isAddedToList)
             inventoryItems.add(inventoryListItem);
+    if(scanListener != null)
+        scanListener.handleScannedItem(inventoryListItem.getMemoryBankData());
     }
 
     //these method to handel the button click trigger of the rfid device
