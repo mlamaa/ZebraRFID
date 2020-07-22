@@ -530,7 +530,6 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
     }
 
     public void setUpScannerReceiverRFID(Activity activity) {
-        releaseMotorolaScanner(activity);
         isScannerReady = true;
         if(myReceiver==null){
             myReceiver = new BroadcastReceiver() {
@@ -549,8 +548,7 @@ public abstract class Connector implements GenericReader.GenericReaderResponsePa
                         String data = i.getStringExtra(MOTOROLA_DW.DATA_STRING_TAG);
 
                         if (data != null && data.length() > 0)
-                            if(scanListener != null)
-                                scanListener.handleScannedItem(data);
+                            scanListener.handleScannedItem(data);
                     }
                 }
             };
